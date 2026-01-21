@@ -211,6 +211,7 @@ def sparse_reconstruction_based_on_images(
         image_path=images_path,
         output_path=sparse_path
     )[0]
+    save_reconstruction(reconstruction)
 
     if verbose:
         print("Cameras:", reconstruction.cameras)

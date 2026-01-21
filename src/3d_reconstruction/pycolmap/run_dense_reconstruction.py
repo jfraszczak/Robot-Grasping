@@ -42,6 +42,7 @@ def dense_reconstruction_based_on_images(
         workspace_format="COLMAP",
         output_path=dense_path
     )
+    save_reconstruction(reconstruction)
 
     if verbose:
         print("Cameras:", reconstruction.cameras)
