@@ -239,31 +239,45 @@ def get_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    args: argparse.Namespace = get_args()
-    if args.aruco_markers:
+def run_sparse_reconstruction(
+    images_path: str,
+    calibration_path: str,
+    use_aruco_markers: bool,
+    verbose: bool
+) -> None:
+    if use_aruco_markers:
         camera_matrix, distortion_coeffs = calibrate_camera(
-            images_path=args.calibration_path,
+            images_path=calibration_path,
             chessboard_size=(15, 6),
             square_size=1.6,
             verbose=False
         )
         poses: dict[str, np.ndarray] = estimate_poses(
-            images_path=args.images_path,
+            images_path=images_path,
             camera_matrix=camera_matrix,
             distortion_coeffs=distortion_coeffs,
-            verbose=args.verbose
+            verbose=verbose
         )
 
         sparse_reconstruction_based_on_poses(
-            images_path=args.images_path,
+            images_path=images_path,
             camera_matrix=camera_matrix,
             distortion_coeffs=distortion_coeffs,
             poses=poses,
-            verbose=args.verbose
+            verbose=verbose
         )
     else:
         sparse_reconstruction_based_on_images(
-            images_path=args.images_path,
-            verbose=args.verbose
+            images_path=images_path,
+            verbose=verbose
         )
+
+
+if __name__ == "__main__":
+    args: argparse.Namespace = get_args()
+    run_sparse_reconstruction(
+        images_path=args.images_path,
+        calibration_path=args.calibration_path,
+        use_aruco_markers=args.aruco_markers,
+        verbose=args.verbose
+    )
