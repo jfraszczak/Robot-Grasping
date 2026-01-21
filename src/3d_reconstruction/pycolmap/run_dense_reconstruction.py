@@ -12,7 +12,7 @@ from .run_sparse_reconstruction import (
     estimate_poses,
     get_args
 )
-from .visualization import visualize_keypoints, visualize_reconstruction
+from .visualization import visualize_reconstruction, save_reconstruction
 
 
 @measure_time
@@ -67,12 +67,11 @@ def dense_reconstruction_based_on_poses(
 
     sparse_path: str = "sparse"
     dense_path: str = "dense"
-    model_path: str = os.path.join(sparse_path, "0")
 
     pycolmap.undistort_images(
         image_path=images_path,
         output_path=dense_path,
-        input_path=model_path
+        input_path=sparse_path
     )
 
     pycolmap.patch_match_stereo(
@@ -85,6 +84,7 @@ def dense_reconstruction_based_on_poses(
         workspace_format="COLMAP",
         output_path=dense_path
     )
+    save_reconstruction(reconstruction)
 
     if verbose:
         print("Cameras:", reconstruction.cameras)

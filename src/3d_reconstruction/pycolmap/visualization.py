@@ -24,7 +24,7 @@ def visualize_keypoints(database_path: str, images_path: str) -> None:
     db.close()
 
 
-def visualize_reconstruction(reconstruction: pycolmap.Reconstruction, save: bool = True) -> None:
+def _build_pcd(reconstruction: pycolmap.Reconstruction) -> o3d.geometry.PointCloud:
     points: list[float] = []
     colors: list[float]  = []
 
@@ -37,10 +37,17 @@ def visualize_reconstruction(reconstruction: pycolmap.Reconstruction, save: bool
     pcd.colors = o3d.utility.Vector3dVector(np.asarray(colors))
     pcd = pcd.voxel_down_sample(0.01)
     pcd, _ = pcd.remove_statistical_outlier(20, 2.0)
+    return pcd
+
+
+def visualize_reconstruction(reconstruction: pycolmap.Reconstruction) -> None:
+    pcd: o3d.geometry.PointCloud = _build_pcd(reconstruction)
     frame = o3d.geometry.TriangleMesh.create_coordinate_frame(
         size=0.5, origin=[0, 0, 0]
     )
     o3d.visualization.draw_geometries([pcd, frame])
 
-    if save:
-        o3d.io.write_point_cloud(f"reconstruction.ply", pcd)
+
+def save_reconstruction(reconstruction: pycolmap.Reconstruction) -> None:
+    pcd: o3d.geometry.PointCloud = _build_pcd(reconstruction)
+    o3d.io.write_point_cloud(f"reconstruction.ply", pcd)

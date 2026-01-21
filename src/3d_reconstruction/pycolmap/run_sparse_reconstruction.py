@@ -14,7 +14,11 @@ from ..aruco_markers_detection import (
 )
 from ..pose_estimation import estimate_pose
 from ..utils import measure_time
-from .visualization import visualize_keypoints, visualize_reconstruction
+from .visualization import (
+    visualize_keypoints,
+    visualize_reconstruction,
+    save_reconstruction
+)
 
 
 def estimate_poses(
@@ -168,6 +172,7 @@ def sparse_reconstruction_based_on_poses(
         clear_points=True,
         refine_intrinsics=False
     )
+    save_reconstruction(reconstruction)
 
     if verbose:
         print("Cameras:", reconstruction.cameras)
@@ -258,7 +263,6 @@ def run_sparse_reconstruction(
             distortion_coeffs=distortion_coeffs,
             verbose=verbose
         )
-
         sparse_reconstruction_based_on_poses(
             images_path=images_path,
             camera_matrix=camera_matrix,
