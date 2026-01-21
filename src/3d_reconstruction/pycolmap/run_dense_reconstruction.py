@@ -16,7 +16,7 @@ from .visualization import visualize_keypoints, visualize_reconstruction
 
 
 @measure_time
-def run_dense_reconstruction_based_on_images(
+def dense_reconstruction_based_on_images(
     images_path: str,
     verbose: bool = False
 ) -> dict[str, np.ndarray]:
@@ -51,7 +51,7 @@ def run_dense_reconstruction_based_on_images(
 
 
 @measure_time
-def run_dense_reconstruction_based_on_poses(
+def dense_reconstruction_based_on_poses(
     images_path: str,
     camera_matrix: np.ndarray,
     distortion_coeffs: np.ndarray,
@@ -99,7 +99,6 @@ def run_dense_reconstruction(
     use_aruco_markers: bool,
     verbose: bool
 ) -> None:
-    args: argparse.Namespace = get_args()
     if use_aruco_markers:
         camera_matrix, distortion_coeffs = calibrate_camera(
             images_path=calibration_path,
@@ -114,7 +113,7 @@ def run_dense_reconstruction(
             verbose=verbose
         )
 
-        sparse_reconstruction_based_on_poses(
+        dense_reconstruction_based_on_poses(
             images_path=images_path,
             camera_matrix=camera_matrix,
             distortion_coeffs=distortion_coeffs,
@@ -122,7 +121,7 @@ def run_dense_reconstruction(
             verbose=verbose
         )
     else:
-        sparse_reconstruction_based_on_images(
+        dense_reconstruction_based_on_images(
             images_path=images_path,
             verbose=verbose
         )
