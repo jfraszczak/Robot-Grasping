@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from ..camera_calibration import calibrate_camera
+from ...geometry.camera_calibration import calibrate_camera
 from ..aruco_markers_detection import (
     detect_aruco_markers,
     get_full_circle_aruco_board,
@@ -18,7 +18,13 @@ from ..epipolar_geometry import (
 )
 
 
-def compute_disparity(img_path1: str, img_path2: str, verbose: bool = False) -> None:
+def compute_disparity(
+    img_path1: str,
+    img_path2: str,
+    camera_matrix: np.ndarray,
+    distortion_coeffs: np.ndarray,
+    verbose: bool = False
+) -> None:
     # Calibrate camera
     camera_matrix, distortion_coeffs = calibrate_camera(
         images_path="data/calibration/*.jpg",
@@ -33,7 +39,7 @@ def compute_disparity(img_path1: str, img_path2: str, verbose: bool = False) -> 
 
     # Detect AruCo markers
     marker_size: float = 1.5
-    radius: float = 4.5
+    radius: float = 4.75
     aruco_dictionary: int = cv2.aruco.DICT_4X4_250
     aruco_board: cv2.aruco.Board = get_full_circle_aruco_board(
         marker_size=marker_size,
@@ -162,3 +168,9 @@ if __name__ == "__main__":
         img_path2="data/green-rasp-1/IMG_20251210_101029776.jpg",
         verbose=True
     )
+
+    # compute_disparity(
+    #     img_path1="data/stereo/IMG_20251210_101829904.jpg",
+    #     img_path2="data/stereo/IMG_20251210_101835457.jpg",
+    #     verbose=True
+    # )

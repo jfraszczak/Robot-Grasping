@@ -6,7 +6,7 @@ def estimate_pose(
     obj_points: np.ndarray,
     img_points: np.ndarray,
     camera_matrix: np.ndarray,
-    distortion_coeffs: np.ndarray
+    distortion_coeffs: np.ndarray | None = None
 ) -> tuple[np.ndarray]:
     """
     Estimates the camera pose in object coordinates from 3D-2D correspondences.

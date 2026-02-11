@@ -53,3 +53,16 @@ def calibrate_camera(
 
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     return mtx, dist
+
+
+def undistort(
+    img: np.ndarray,
+    camera_matrix: np.ndarray,
+    distortion_coeffs: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    h, w = img.shape[:2]
+    newcameramtx, roi = cv.getOptimalNewCameraMatrix(camera_matrix, distortion_coeffs, (w,h), 1, (w,h))
+    dst = cv.undistort(img, camera_matrix, distortion_coeffs, None, newcameramtx)
+    x, y, w, h = roi
+    dst = dst[y:y+h, x:x+w]
+    return dst, newcameramtx

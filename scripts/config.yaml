@@ -1,0 +1,21 @@
+camera_calibration:
+  path: "data/calibration/*.jpg"
+  chessboard_rows: 15
+  chessboard_columns: 6
+  square_size: 1.6
+
+# camera_calibration:
+#   path: "data/calibration_iphone/*.jpeg"
+#   chessboard_rows: 10
+#   chessboard_columns: 7
+#   square_size: 2.4
+
+# camera_calibration:
+#   path: "data/results-photo/calibration_8p3mm/*"
+#   chessboard_rows: 10
+#   chessboard_columns: 7
+#   square_size: 0.83
+
+aruco_board:
+  marker_size: 1.5
+  radius: 4.75

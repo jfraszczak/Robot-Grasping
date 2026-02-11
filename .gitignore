@@ -11,3 +11,6 @@ __pycache__
 # pycolmap
 *.db
 *.bin
+
+# Point clouds
+*.ply
