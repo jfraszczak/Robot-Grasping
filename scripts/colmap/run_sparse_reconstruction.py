@@ -4,6 +4,8 @@ import argparse
 import yaml
 import cv2
 import numpy as np
+
+from .args import get_args
 from src.geometry.camera_calibration import calibrate_camera
 from src.aruco.markers_detection import get_full_circle_aruco_board
 from src.reconstruction.colmap.sparse_reconstruction import (
@@ -11,25 +13,6 @@ from src.reconstruction.colmap.sparse_reconstruction import (
     sparse_reconstruction_based_on_images
 )
 from src.reconstruction.colmap.estimate_poses_and_mask import estimate_poses_and_mask
-
-
-def get_args() -> argparse.Namespace:
-    parser: argparse.ArgumentParser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--images_path",
-        type=str,
-        help="Path to input images directory"
-    )
-    parser.add_argument(
-        "--aruco_markers",
-        action="store_true",
-        help="Use AruCo markers for pose estimation"
-    )
-    parser.add_argument(
-        "--verbose",
-        action="store_true"
-    )
-    return parser.parse_args()
 
 
 def run_sparse_reconstruction(

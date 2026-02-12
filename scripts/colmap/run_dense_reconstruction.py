@@ -1,6 +1,6 @@
 import argparse
 
-import opencv as cv2
+import cv2
 import numpy as np
 import yaml
 
@@ -16,7 +16,6 @@ from src.reconstruction.colmap.dense_reconstruction import (
 
 def run_dense_reconstruction(
     images_path: str,
-    calibration_path: str,
     use_aruco_markers: bool,
     verbose: bool
 ) -> None:
@@ -25,9 +24,9 @@ def run_dense_reconstruction(
 
     if use_aruco_markers:
         camera_matrix, distortion_coeffs = calibrate_camera(
-            images_path=calibration_path,
-            chessboard_size=(15, 6),
-            square_size=1.6,
+            images_path=config["camera_calibration"]["path"],
+            chessboard_size=(config["camera_calibration"]["chessboard_rows"], config["camera_calibration"]["chessboard_columns"]),
+            square_size=config["camera_calibration"]["square_size"],
             verbose=False
         )
         aruco_dictionary: int = cv2.aruco.DICT_4X4_250
@@ -62,7 +61,6 @@ if __name__ == "__main__":
     args: argparse.Namespace = get_args()
     run_dense_reconstruction(
         images_path=args.images_path,
-        calibration_path=args.calibration_path,
         use_aruco_markers=args.aruco_markers,
         verbose=args.verbose
     )
