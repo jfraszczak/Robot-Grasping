@@ -5,21 +5,21 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from src.aruco.markers_detection import (
-    detect_aruco_markers,
-    mask_board
-)
+from src.aruco.markers_detection import detect_aruco_markers
+from src.aruco.masking import mask_board
+
 from src.aruco.visualization import draw_detected_markers
 from src.geometry.pose_estimation import estimate_pose
+from src.geometry import CameraParameters, Transformation3D
+from src.reconstruction import ImageFrame
 
 
 def estimate_poses_and_mask(
     images_path: str,
-    camera_matrix: np.ndarray,
-    distortion_coeffs: np.ndarray,
+    camera_parameters: CameraParameters,
     aruco_board: cv2.aruco.Board,
     verbose: bool = False
-) -> dict[str, np.ndarray]:
+) -> list[ImageFrame]:
     images_masked_path: str = os.path.join(os.path.dirname(images_path), "masked")
     path: Path = Path(images_masked_path)
     if path.exists():
@@ -33,8 +33,8 @@ def estimate_poses_and_mask(
         marker_corners, marker_ids = detect_aruco_markers(
             img=img,
             aruco_board=aruco_board,
-            camera_matrix=camera_matrix,
-            distortion_coeffs=distortion_coeffs
+            camera_matrix=camera_parameters.matrix,
+            distortion_coeffs=camera_parameters.distortion_coeffs
         )
 
         if verbose:
@@ -49,8 +49,7 @@ def estimate_poses_and_mask(
         t_camera_object: np.ndarray = estimate_pose(
             obj_points=obj_points,
             img_points=img_points,
-            camera_matrix=camera_matrix,
-            distortion_coeffs=distortion_coeffs
+            camera_parameters=camera_parameters
         )
 
         img_masked_path: str = os.path.join(images_masked_path, img_name)
@@ -66,5 +65,14 @@ def estimate_poses_and_mask(
             verbose=False
         )
         cv2.imwrite(img_masked_path, img_masked)
+
+    image_frames: list[ImageFrame] = []
+    for img_path, pose in poses.items():
+        image_frames.append(
+            ImageFrame(
+                path=img_path,
+                t_cam_to_world=Transformation3D(matrix=pose)
+            )
+        )
             
-    return poses
+    return image_frames

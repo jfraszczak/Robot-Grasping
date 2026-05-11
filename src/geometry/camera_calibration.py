@@ -1,6 +1,7 @@
 import numpy as np
 import cv2 as cv
 import glob
+from .models import CameraParameters
 
 
 # https://docs.opencv.org/4.x/dc/dbb/tutorial_py_calibration.html
@@ -9,7 +10,7 @@ def calibrate_camera(
     chessboard_size: tuple[int, int],
     square_size: float = 1.0,
     verbose: bool = False
-) -> tuple[np.ndarray, np.ndarray]:
+) -> CameraParameters:
 
     # termination criteria
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -52,7 +53,7 @@ def calibrate_camera(
         cv.destroyAllWindows()
 
     ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-    return mtx, dist
+    return CameraParameters(matrix=mtx, distortion_coeffs=dist)
 
 
 def undistort(

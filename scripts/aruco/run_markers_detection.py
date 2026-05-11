@@ -1,32 +1,26 @@
 import cv2
 import numpy as np
-import yaml
 
-from src.aruco.markers_detection import detect_aruco_markers, get_full_circle_aruco_board, mask_board
+from src.aruco.markers_detection import detect_aruco_markers, get_full_circle_aruco_board
+from src.aruco.masking import mask_board
 from src.aruco.visualization import draw_aruco_board, draw_detected_markers
 from src.geometry.camera_calibration import calibrate_camera
-from src.utils import measure_time
+from src.geometry import CameraParameters
+from ..config import Config
 
 
-@measure_time
-def run_markers_detection(img_path: str) -> None:
-    # Read config
-    with open("scripts/config.yaml", "r") as file:
-        config: dict = yaml.safe_load(file)
-
-    # Calibrate camera
-    camera_matrix, distortion_coeffs = calibrate_camera(
-        images_path=config["camera_calibration"]["path"],
-        chessboard_size=(config["camera_calibration"]["chessboard_rows"], config["camera_calibration"]["chessboard_columns"]),
-        square_size=config["camera_calibration"]["square_size"],
+def run_markers_detection(img_path: str, config: Config) -> None:
+    camera_parameters: CameraParameters = calibrate_camera(
+        images_path=config.camera_calibration.path,
+        chessboard_size=(config.camera_calibration.chessboard_rows, config.camera_calibration.chessboard_columns),
+        square_size=config.camera_calibration.square_size,
         verbose=False
     )
 
-    # Detect AruCo markers
     aruco_dictionary: int = cv2.aruco.DICT_4X4_250
     aruco_board: cv2.aruco.Board = get_full_circle_aruco_board(
-        marker_size=config["aruco_board"]["marker_size"],
-        radius=config["aruco_board"]["radius"],
+        marker_size=config.aruco_board.marker_size,
+        radius=config.aruco_board.radius,
         aruco_dictionary=aruco_dictionary
     )
 
@@ -34,8 +28,8 @@ def run_markers_detection(img_path: str) -> None:
     marker_corners, marker_ids = detect_aruco_markers(
         img=img,
         aruco_board=aruco_board,
-        camera_matrix=camera_matrix,
-        distortion_coeffs=distortion_coeffs
+        camera_matrix=camera_parameters.matrix,
+        distortion_coeffs=camera_parameters.distortion_coeffs
     )
 
     # Visualize result
@@ -53,10 +47,14 @@ def run_markers_detection(img_path: str) -> None:
         obj_points=obj_points,
         img_points=img_points,
         marker_ids=marker_ids,
-        board_radius=config["aruco_board"]["radius"] - config["camera_calibration"]["square_size"] / 2,
+        board_radius=config.aruco_board.radius - config.camera_calibration.square_size / 2,
         verbose=True
     )
 
 
 if __name__ == "__main__":
-    run_markers_detection("data/green-rasp-1/IMG_20251210_101023320.jpg")
+    config: Config = Config.from_yaml("scripts/config.yaml")
+    run_markers_detection(
+        img_path="data/pp/green-rasp-1/IMG_20251210_101023320.jpg",
+        config=config
+    )

@@ -1,12 +1,12 @@
 import cv2
 import numpy as np
+from .models import CameraParameters
 
 
 def estimate_pose(
     obj_points: np.ndarray,
     img_points: np.ndarray,
-    camera_matrix: np.ndarray,
-    distortion_coeffs: np.ndarray | None = None
+    camera_parameters: CameraParameters
 ) -> tuple[np.ndarray]:
     """
     Estimates the camera pose in object coordinates from 3D-2D correspondences.
@@ -17,8 +17,8 @@ def estimate_pose(
     success, rotation_vector, translation_vector = cv2.solvePnP(
         obj_points,
         img_points,
-        camera_matrix,
-        distortion_coeffs
+        camera_parameters.matrix,
+        camera_parameters.distortion_coeffs
     )
 
     if not success:

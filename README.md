@@ -12,7 +12,7 @@ pip install uv
 ## Run PyCOLMAP Reconstruction
 
 ```sh
-uv run python -m src.3d_reconstruction.pycolmap.run_sparse_reconstruction  --images_path "data/green-rasp-1" --aruco_markers --verbose
+uv run python -m src.3d_reconstruction.pycolmap.run_sparse_reconstruction  --images_path "data/green-rasp-1" --calibration_path "data/calibration/*.jpg" --aruco_markers --verbose
 ```
 
 ```sh
