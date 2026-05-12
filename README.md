@@ -1,7 +1,7 @@
 # Robot-Grasping
 
-## Insallation
-sh```
+## Installation
+```sh
 git clone <git_url>
 ```
 
