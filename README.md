@@ -9,22 +9,15 @@ git clone <git_url>
 pip install uv
 ```
 
-## Run PyCOLMAP Reconstruction
+## Run Synthetic Pipeline
 
 ```sh
-uv run python -m src.3d_reconstruction.pycolmap.run_sparse_reconstruction  --images_path "data/green-rasp-1" --calibration_path "data/calibration/*.jpg" --aruco_markers --verbose
+uv run python3 -m scripts.run_grasp_generation_simulation --verbose
 ```
 
-```sh
-uv run python -m src.3d_reconstruction.pycolmap.run_dense_reconstruction  --images_path "data/green-rasp-1" --calibration_path "data/calibration/*.jpg" --aruco_markers --verbose
-```
 
-## Compute Disparity
-```sh
-uv run python -m src.3d_reconstruction.stereo.compute_disparity
-```
+## Run AruCo-based Pipeline
 
-## Visualize Reconstructions
 ```sh
-uv run python -m reconstructions.visualize
+uv run python3 -m scripts.run_grasp_generation_aruco --verbose
 ```
