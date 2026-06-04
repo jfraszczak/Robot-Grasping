@@ -73,7 +73,6 @@ class Open3DRenderer(IRenderer):
 
         verts = np.asarray(mesh.vertices)
         verts -= verts.mean(axis=0)
-        verts /= np.max(np.abs(np.max(verts, axis=0) - np.min(verts, axis=0)))
         mesh.vertices = open3d.utility.Vector3dVector(verts)
 
         mesh.compute_vertex_normals()
@@ -88,7 +87,7 @@ class Open3DRenderer(IRenderer):
 
         trajectory: list[Transformation3D] = get_fibonacci_hemisphere_trajectory_opencv(
             steps=frame_count,
-            radius=3.0
+            radius=0.2
         )
         image_frames: list[ImageFrame] = []
         for step, camera_orientation in enumerate(trajectory):

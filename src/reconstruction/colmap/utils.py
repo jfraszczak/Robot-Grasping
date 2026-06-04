@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import pycolmap
 import open3d
+from scipy import stats
 
 from src.reconstruction import ImageFrame
 from src.geometry import Transformation3D
@@ -56,12 +57,40 @@ def get_camera_transformations(reconstruction: pycolmap.Reconstruction) -> dict[
     return camera_transformations
 
 
+def get_scaling_factor(
+    frames: list[ImageFrame],
+    colmap_camera_transformations: dict[str, Transformation3D]
+) -> float:
+    x: list[float] = []
+    y: list[float] = []
+    for i in range(len(frames)):
+        for j in range(i + 1, len(frames)):
+            x.append(
+                np.linalg.norm(frames[i].t_cam_to_world.matrix[:3, 3] - frames[j].t_cam_to_world.matrix[:3, 3])
+            )
+            y.append(
+                np.linalg.norm(colmap_camera_transformations[os.path.basename(frames[i].path)].matrix[:3, 3] - colmap_camera_transformations[os.path.basename(frames[j].path)].matrix[:3, 3])
+            )
+    
+    x_numpy: np.ndarray = np.array(x)
+    y_numpy: np.ndarray = np.array(y)
+
+    return 1 / stats.linregress(x_numpy, y_numpy).slope
+
+
 def transform_from_colmap_to_original_frame(reconstruction: pycolmap.Reconstruction, frames: list[ImageFrame]) -> open3d.geometry.PointCloud:
     point_cloud: open3d.geometry.PointCloud = build_point_cloud(reconstruction)
     camera_transformations: dict[str, Transformation3D] = get_camera_transformations(reconstruction)
+
+    scale_factor: float = get_scaling_factor(frames, camera_transformations)
+    point_cloud_scaled: open3d.geometry.PointCloud = point_cloud.scale(scale=scale_factor, center=point_cloud.get_center())
+
     for frame in frames:
         if os.path.basename(frame.path) in camera_transformations:
-            t_colmap_to_world: Transformation3D = frame.t_cam_to_world @ camera_transformations[os.path.basename(frame.path)].inverse()
-            point_cloud.transform(t_colmap_to_world.matrix)
-            return point_cloud
+            t_colmap: np.ndarray = camera_transformations[os.path.basename(frame.path)].inverse()
+            t_colmap.matrix[:3, 3] *= scale_factor
+
+            t_colmap_to_world: Transformation3D = frame.t_cam_to_world @ t_colmap
+            point_cloud_scaled.transform(t_colmap_to_world.matrix)
+            return point_cloud_scaled
     raise RuntimeError("Failed to transform object to original coordinate frame")

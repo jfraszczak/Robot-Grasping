@@ -91,7 +91,7 @@ def rotate_and_render(
     verbose: bool = False
 ) -> list[ImageFrame]:
     clear_scene()
-    import_object(filepath=obj_file, normalize=True)
+    import_object(filepath=obj_file, normalize=False)
     camera: bpy.types.Object = add_camera(location=Coordinates(x=0.0, y=-radius, z=0.0))
     camera = set_camera_parameters(
         camera=camera,
@@ -154,6 +154,6 @@ class BlenderRenderer(IRenderer):
             output_dir=output_dir,
             camera_parameters=self.camera_parameters,
             steps=frame_count,
-            radius=3.0,
+            radius=0.3,
             verbose=verbose
         )

@@ -1,7 +1,10 @@
 from .igrasp_estimator import IGraspEstimator
-from .mujoco_grasp_estimator import MujocoGraspEstimator
+from .franka_emika_panda_grasper import FrankaEmikaPandaGrasper
+from .models import PhysicalCoefficients, GraspTrajectory
 
 __all__ = [
     "IGraspEstimator",
-    "MujocoGraspEstimator"
+    "FrankaEmikaPandaGrasper",
+    "PhysicalCoefficients",
+    "GraspTrajectory",
 ]

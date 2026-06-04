@@ -1,9 +1,9 @@
 import open3d
 
-from src.geometry import CameraParameters, Transformation3D
+from src.geometry import CameraParameters
 from src.reconstruction import Frame, IReconstructor
 from src.meshing import IMeshReconstructor
-from src.grasping import IGraspEstimator
+from src.grasping import IGraspEstimator, PhysicalCoefficients, GraspTrajectory
 
 
 class GraspingPipeline:
@@ -22,8 +22,9 @@ class GraspingPipeline:
         self, 
         frames: list[Frame],
         camera_parameters: CameraParameters,
+        physical_coeffs: PhysicalCoefficients,
         verbose: bool = False
-    ) -> Transformation3D:
+    ) -> GraspTrajectory | None:
         point_cloud: open3d.geometry.PointCloud = self.reconstructor.run(
             frames=frames,
             camera_parameters=camera_parameters,
@@ -33,8 +34,9 @@ class GraspingPipeline:
             point_cloud=point_cloud,
             verbose=verbose
         )
-        grasp: Transformation3D = self.grasp_estimator.run(
+        grasp_trajectory: GraspTrajectory | None = self.grasp_estimator.run(
             mesh=mesh,
+            physical_coeffs=physical_coeffs,
             verbose=verbose
         )
-        return grasp
+        return grasp_trajectory

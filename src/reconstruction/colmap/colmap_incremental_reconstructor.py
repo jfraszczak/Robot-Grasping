@@ -27,7 +27,11 @@ class ColmapIncrementalReconstructor(IReconstructor):
 
         pycolmap.extract_features(
             database_path=database_path,
-            image_path=images_path
+            image_path=images_path,
+            reader_options=pycolmap.ImageReaderOptions(
+                camera_model="PINHOLE",
+                camera_params=f"{camera_parameters.fx},{camera_parameters.fy},{camera_parameters.cx},{camera_parameters.cy}"
+            )
         )
         pycolmap.match_exhaustive(database_path=database_path)
         reconstruction: pycolmap.Reconstruction = pycolmap.incremental_mapping(
@@ -50,7 +54,8 @@ class ColmapIncrementalReconstructor(IReconstructor):
         )
         if verbose:
             coordinate_frame: open3d.geometry.TriangleMesh = open3d.geometry.TriangleMesh.create_coordinate_frame(
-                size=1.0, origin=[0, 0, 0]
+                size=0.05,
+                origin=[0, 0, 0]
             )
             open3d.visualization.draw_geometries([point_cloud, coordinate_frame])
 

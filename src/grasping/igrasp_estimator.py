@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import open3d
-from src.geometry import Transformation3D
+from .models import PhysicalCoefficients, GraspTrajectory
 
 
 class IGraspEstimator(ABC):
@@ -9,6 +9,7 @@ class IGraspEstimator(ABC):
     def run(
         self,
         mesh: open3d.geometry.TriangleMesh,
+        physical_coeffs: PhysicalCoefficients,
         verbose: bool = False
-    ) -> Transformation3D:
+    ) -> GraspTrajectory | None:
         pass

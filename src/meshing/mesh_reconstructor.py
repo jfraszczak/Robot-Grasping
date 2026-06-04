@@ -5,7 +5,7 @@ from src.utils import measure_time
 
 
 def show_mesh(mesh: open3d.geometry.TriangleMesh) -> None:
-    frame: open3d.geometry.TriangleMesh = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.5, origin=(0, 0, 0))
+    frame: open3d.geometry.TriangleMesh = open3d.geometry.TriangleMesh.create_coordinate_frame(size=0.05, origin=(0, 0, 0))
     open3d.visualization.draw_geometries([mesh, frame])
 
 

@@ -128,7 +128,8 @@ class ColmapTriangulationReconstructor(IReconstructor):
         )
         if verbose:
             coordinate_frame: open3d.geometry.TriangleMesh = open3d.geometry.TriangleMesh.create_coordinate_frame(
-                size=1.0, origin=[0, 0, 0]
+                size=0.05,
+                origin=[0, 0, 0]
             )
             open3d.visualization.draw_geometries([point_cloud, coordinate_frame])
 
