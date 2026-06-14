@@ -3,7 +3,7 @@
 A framework for evaluating how **3D reconstruction quality impacts robotic grasp success**, using synthetic rendering, photogrammetric reconstruction, and physics-based grasp simulation.
 
 <p align="center">
-  <img src="assets/diagram.gif" alt="Pipeline overview" width="80%"/>
+  <img src="assets/diagram.gif" alt="Pipeline overview"/>
 </p>
 
 ## Motivation
