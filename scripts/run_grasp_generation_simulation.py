@@ -6,6 +6,7 @@ from .args import get_args
 from src.geometry import CameraParameters
 from src.reconstruction import ImageFrame
 from src.reconstruction.colmap import ColmapTriangulationReconstructor, ColmapIncrementalReconstructor
+from src.reconstruction.depth_anything import DepthAnythingReconstructor
 from src.meshing import AlphaShapeMeshReconstructor, PoissonMeshReconstructor
 from src.grasping import FrankaEmikaPandaGrasper, PhysicalCoefficients
 from src.pipeline import GraspingPipeline
@@ -25,12 +26,9 @@ def run_grasp_generation_simulation(
     ], dtype=float)
     camera_parameters: CameraParameters = CameraParameters(matrix=intrinsic)
 
-    renderer: Open3DRenderer = Open3DRenderer(
+    renderer: BlenderRenderer = BlenderRenderer(
         camera_parameters=camera_parameters
     )
-    # renderer: BlenderRenderer = BlenderRenderer(
-    #     camera_parameters=camera_parameters
-    # )
     image_frames: list[ImageFrame] = renderer.run(
         obj_file=obj_file,
         verbose=False,
@@ -39,7 +37,7 @@ def run_grasp_generation_simulation(
     )
 
     grasping_pipeline: GraspingPipeline = GraspingPipeline(
-        reconstructor=ColmapIncrementalReconstructor(),
+        reconstructor=DepthAnythingReconstructor(),
         mesh_reconstructor=AlphaShapeMeshReconstructor(),
         grasp_estimator=FrankaEmikaPandaGrasper(model_path="third_party/mujoco_menagerie/franka_emika_panda/panda.xml")
     )
@@ -60,6 +58,6 @@ def run_grasp_generation_simulation(
 if __name__ == "__main__":
     args: argparse.Namespace = get_args()
     run_grasp_generation_simulation(
-        obj_file="data/ycb/strawberry/012_strawberry/google_512k/textured.obj",
+        obj_file="data/ycb/012_strawberry/google_512k/textured.obj",
         verbose=args.verbose
     )

@@ -13,3 +13,13 @@ class IGraspEstimator(ABC):
         verbose: bool = False
     ) -> GraspTrajectory | None:
         pass
+
+    @abstractmethod
+    def evaluate_grasp(
+        self,
+        mesh: open3d.geometry.TriangleMesh,
+        physical_coeffs: PhysicalCoefficients,
+        grasp_trajectory: GraspTrajectory,
+        verbose: bool = False
+    ) -> bool:
+        pass

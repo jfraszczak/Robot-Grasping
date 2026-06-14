@@ -10,7 +10,7 @@ from src.reconstruction import ImageFrame
 from src.reconstruction.colmap import ColmapTriangulationReconstructor, ColmapIncrementalReconstructor
 from src.reconstruction.depth_anything import DepthAnythingReconstructor
 from src.meshing import AlphaShapeMeshReconstructor
-from src.grasping import MujocoGraspEstimator
+from src.grasping import FrankaEmikaPandaGrasper, PhysicalCoefficients
 from src.pipeline import GraspingPipeline
 from scripts.config import Config
 
@@ -40,12 +40,18 @@ def run_colmap_grasp_generation(config: Config, verbose: bool) -> None:
     grasping_pipeline: GraspingPipeline = GraspingPipeline(
         reconstructor=DepthAnythingReconstructor(),
         mesh_reconstructor=AlphaShapeMeshReconstructor(),
-        grasp_estimator=MujocoGraspEstimator()
+        grasp_estimator=FrankaEmikaPandaGrasper(model_path="third_party/mujoco_menagerie/franka_emika_panda/panda.xml")
     )
 
     grasping_pipeline.run(
         frames=image_frames,
         camera_parameters=camera_parameters,
+        physical_coeffs=PhysicalCoefficients(
+            mass=0.02,
+            friction_sliding=2.0,
+            friction_torsional=0.05,
+            friction_rolling=0.01
+        ),
         verbose=True
     )
 

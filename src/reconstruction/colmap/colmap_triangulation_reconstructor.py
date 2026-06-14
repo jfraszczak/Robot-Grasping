@@ -76,6 +76,10 @@ def tmp_images_dir(image_frames: list[ImageFrame],) -> Generator[Path, None, Non
 
 
 class ColmapTriangulationReconstructor(IReconstructor):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.reconstruction: pycolmap.Reconstruction | None = None
     
     @measure_time
     def run(
@@ -121,6 +125,7 @@ class ColmapTriangulationReconstructor(IReconstructor):
                 image_path=images_path,
                 output_path=output_path
             )
+            self.reconstruction = reconstruction
 
         point_cloud: open3d.geometry.PointCloud = transform_from_colmap_to_original_frame(
             reconstruction=reconstruction,
@@ -134,3 +139,8 @@ class ColmapTriangulationReconstructor(IReconstructor):
             open3d.visualization.draw_geometries([point_cloud, coordinate_frame])
 
         return point_cloud
+
+
+    def get_reconstruction(self) -> pycolmap.Reconstruction | None:
+        return self.reconstruction
+    

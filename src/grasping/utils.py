@@ -32,11 +32,3 @@ def get_bounding_sphere(
         )
     
     return center, radius
-
-
-if __name__ == "__main__":
-    mesh: open3d.geometry.TriangleMesh = open3d.io.read_triangle_mesh(
-        "data/ycb/strawberry/012_strawberry/google_512k/textured.obj"
-    )
-    mesh.compute_vertex_normals()
-    get_bounding_sphere(mesh, verbose=True)

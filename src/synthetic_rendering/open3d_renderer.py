@@ -1,13 +1,12 @@
 import open3d
-import trimesh
 import numpy as np
 import cv2
 
 from src.geometry import Transformation3D, CameraParameters
 from src.reconstruction import ImageFrame, StereoFrame
 from .irenderer import IRenderer
-from .trajectory import get_fibonacci_hemisphere_trajectory_opencv
-from src.utils import create_dir
+from .trajectory import get_fibonacci_hemisphere_trajectory
+from src.utils import create_dir, load_mesh
 
 
 def render(
@@ -63,19 +62,7 @@ class Open3DRenderer(IRenderer):
         output_dir: str = "render",
         verbose: bool = False
     ) -> list[ImageFrame]:
-        mesh_trimesh = trimesh.load(obj_file)
-        vertex_colors = mesh_trimesh.visual.to_color().vertex_colors[:, :3] / 255.0
-
-        mesh = open3d.geometry.TriangleMesh()
-        mesh.vertices = open3d.utility.Vector3dVector(np.array(mesh_trimesh.vertices))
-        mesh.triangles = open3d.utility.Vector3iVector(np.array(mesh_trimesh.faces))
-        mesh.vertex_colors = open3d.utility.Vector3dVector(vertex_colors)
-
-        verts = np.asarray(mesh.vertices)
-        verts -= verts.mean(axis=0)
-        mesh.vertices = open3d.utility.Vector3dVector(verts)
-
-        mesh.compute_vertex_normals()
+        mesh: open3d.geometry.TriangleMesh = load_mesh(obj_file)
 
         if verbose:
             frame = open3d.geometry.TriangleMesh.create_coordinate_frame(
@@ -85,7 +72,7 @@ class Open3DRenderer(IRenderer):
 
         create_dir(output_dir)
 
-        trajectory: list[Transformation3D] = get_fibonacci_hemisphere_trajectory_opencv(
+        trajectory: list[Transformation3D] = get_fibonacci_hemisphere_trajectory(
             steps=frame_count,
             radius=0.2
         )

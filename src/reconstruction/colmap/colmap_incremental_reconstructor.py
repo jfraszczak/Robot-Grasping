@@ -12,6 +12,10 @@ from src.utils import create_dir
 
 class ColmapIncrementalReconstructor(IReconstructor):
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.reconstruction: pycolmap.Reconstruction | None = None
+
     @measure_time
     def run(
         self,
@@ -48,6 +52,8 @@ class ColmapIncrementalReconstructor(IReconstructor):
             pycolmap.patch_match_stereo(mvs_path)
             reconstruction: pycolmap.Reconstruction = pycolmap.stereo_fusion(mvs_path / "dense.ply", mvs_path)
 
+        self.reconstruction = reconstruction
+
         point_cloud: open3d.geometry.PointCloud = transform_from_colmap_to_original_frame(
             reconstruction=reconstruction,
             frames=frames
@@ -60,3 +66,6 @@ class ColmapIncrementalReconstructor(IReconstructor):
             open3d.visualization.draw_geometries([point_cloud, coordinate_frame])
 
         return point_cloud
+
+    def get_reconstruction(self) -> pycolmap.Reconstruction | None:
+        return self.reconstruction

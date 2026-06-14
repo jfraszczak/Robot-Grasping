@@ -64,7 +64,13 @@ def get_scaling_factor(
     x: list[float] = []
     y: list[float] = []
     for i in range(len(frames)):
+        if colmap_camera_transformations.get(os.path.basename(frames[i].path)) is None:
+            continue
+        
         for j in range(i + 1, len(frames)):
+            if colmap_camera_transformations.get(os.path.basename(frames[j].path)) is None:
+                continue
+
             x.append(
                 np.linalg.norm(frames[i].t_cam_to_world.matrix[:3, 3] - frames[j].t_cam_to_world.matrix[:3, 3])
             )
@@ -85,12 +91,27 @@ def transform_from_colmap_to_original_frame(reconstruction: pycolmap.Reconstruct
     scale_factor: float = get_scaling_factor(frames, camera_transformations)
     point_cloud_scaled: open3d.geometry.PointCloud = point_cloud.scale(scale=scale_factor, center=point_cloud.get_center())
 
+    transformations_colmap_to_world: list[Transformation3D] = []
     for frame in frames:
         if os.path.basename(frame.path) in camera_transformations:
             t_colmap: np.ndarray = camera_transformations[os.path.basename(frame.path)].inverse()
             t_colmap.matrix[:3, 3] *= scale_factor
-
             t_colmap_to_world: Transformation3D = frame.t_cam_to_world @ t_colmap
-            point_cloud_scaled.transform(t_colmap_to_world.matrix)
-            return point_cloud_scaled
-    raise RuntimeError("Failed to transform object to original coordinate frame")
+            transformations_colmap_to_world.append(t_colmap_to_world)
+
+    if len(transformations_colmap_to_world) == 0:
+        raise RuntimeError("Failed to transform object to original coordinate frame")
+
+    yaw: float = np.mean(np.array([t.yaw for t in transformations_colmap_to_world]))
+    roll: float = np.mean(np.array([t.roll for t in transformations_colmap_to_world]))
+    pitch: float = np.mean(np.array([t.pitch for t in transformations_colmap_to_world]))
+    translation: np.array = np.mean(np.array([t.matrix[:3, 3] for t in transformations_colmap_to_world]), axis=0)
+    t_colmap_to_world_mean: Transformation3D = Transformation3D.from_yaw_pitch_roll(
+        yaw=yaw,
+        pitch=pitch,
+        roll=roll,
+        t=translation
+    )
+
+    point_cloud_scaled.transform(t_colmap_to_world_mean.matrix)
+    return point_cloud_scaled

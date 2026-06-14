@@ -2,6 +2,7 @@ import os
 
 import bpy
 from pydantic import BaseModel
+import numpy as np
 
 from src.geometry import Transformation3D, CameraParameters
 from src.reconstruction import ImageFrame
@@ -76,10 +77,23 @@ def set_camera_parameters(
     return camera
 
 
-def add_light(location: Coordinates) -> None:
-    lights: list[bpy.types.Object] = [obj for obj in bpy.data.objects if obj.type == 'LIGHT']
-    if not lights:
-        bpy.ops.object.light_add(type='SUN', location=location.as_tuple())
+def add_light(location: Coordinates, light_type: str = 'POINT') -> None:
+    bpy.ops.object.light_add(type=light_type, location=location.as_tuple())
+    light_obj = bpy.context.active_object
+    light_obj.data.energy = 200.0
+
+
+def add_ambient_light(strength: float = 1.0) -> None:
+    world = bpy.context.scene.world
+    if world is None:
+        world = bpy.data.worlds.new("World")
+        bpy.context.scene.world = world
+
+    world.use_nodes = True
+    bg_node = world.node_tree.nodes.get("Background")
+    if bg_node:
+        bg_node.inputs["Color"].default_value = (1, 1, 1, 1)
+        bg_node.inputs["Strength"].default_value = strength
 
 
 def rotate_and_render(
@@ -97,7 +111,7 @@ def rotate_and_render(
         camera=camera,
         camera_parameters=camera_parameters
     )
-    add_light(location=Coordinates(x=0.0, y=0.0, z=5.0))
+    add_ambient_light()
     create_dir(output_dir)
     
     trajectory: list[Transformation3D] = get_fibonacci_hemisphere_trajectory(
@@ -109,7 +123,7 @@ def rotate_and_render(
     scene.render.resolution_x = camera_parameters.resolution_x
     scene.render.resolution_y = camera_parameters.resolution_y
     scene.render.image_settings.file_format = 'JPEG'
-    scene.render.engine = 'CYCLES'
+    scene.render.engine = 'BLENDER_EEVEE'
     scene.render.film_transparent = True
 
     original_rotation = camera.rotation_euler.copy()
@@ -117,10 +131,13 @@ def rotate_and_render(
 
     image_frames: list[ImageFrame] = []
     for step, camera_orientation in enumerate(trajectory):
-        camera.location = (camera_orientation.x, camera_orientation.y, camera_orientation.z)
-        camera.rotation_euler[0] = camera_orientation.pitch
-        camera.rotation_euler[1] = camera_orientation.roll
-        camera.rotation_euler[2] = camera_orientation.yaw
+        camera_orientation_blender: Transformation3D = camera_orientation.inverse()
+        camera_orientation_blender = camera_orientation_blender @ Transformation3D(matrix=np.diag([1, -1, -1, 1]))
+
+        camera.location = (camera_orientation_blender.x, camera_orientation_blender.y, camera_orientation_blender.z)
+        camera.rotation_euler[0] = camera_orientation_blender.roll
+        camera.rotation_euler[1] = camera_orientation_blender.pitch
+        camera.rotation_euler[2] = camera_orientation_blender.yaw
 
         print(f"[step {step:03d}] loc={camera.location[:]} rot={list(camera.rotation_euler)}")
 
@@ -154,6 +171,6 @@ class BlenderRenderer(IRenderer):
             output_dir=output_dir,
             camera_parameters=self.camera_parameters,
             steps=frame_count,
-            radius=0.3,
+            radius=0.2,
             verbose=verbose
         )

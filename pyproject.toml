@@ -13,7 +13,8 @@ dependencies = [
     "pycolmap>=4.0.2",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.3",
-    "torch>=2.10.0",
-    "transformers>=5.8.0",
+    "torch>=2.12.0",
+    "torchvision>=0.27.0",
+    "transformers>=5.10.2",
     "trimesh>=4.12.2",
 ]

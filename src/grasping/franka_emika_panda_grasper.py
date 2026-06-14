@@ -362,7 +362,6 @@ def estimate_grasp(
             for _ in run_simulation(model=model, data=data, trajectory=trajectory): pass
         
         is_grasp_successful: bool = is_grasped(model=model, data=data)
-        print(f"Is grasped: {is_grasp_successful}")
         if is_grasp_successful:
             return trajectory
 
@@ -402,6 +401,26 @@ class FrankaEmikaPandaGrasper(IGraspEstimator):
         )
         tmp.close()
         return grasp_trajectory
+    
+    def evaluate_grasp(
+        self,
+        mesh: open3d.geometry.TriangleMesh,
+        physical_coeffs: PhysicalCoefficients,
+        grasp_trajectory: GraspTrajectory,
+        verbose: bool = False
+    ) -> bool:
+        mesh = offset_along_z_axis(mesh)
+        tmp = tempfile.NamedTemporaryFile(suffix=".obj")
+        open3d.io.write_triangle_mesh(tmp.name, mesh)
+        is_grasp_successful: bool = evaluate_grasp(
+            model_path=self.model_path,
+            mesh_path=tmp.name,
+            physical_coeffs=physical_coeffs,
+            grasp_trajectory=grasp_trajectory,
+            verbose=verbose
+        )
+        tmp.close()
+        return is_grasp_successful
 
 
 if __name__ == "__main__":
@@ -409,7 +428,7 @@ if __name__ == "__main__":
         model_path="third_party/mujoco_menagerie/franka_emika_panda/panda.xml"
     )
     mesh: open3d.geometry.TriangleMesh = open3d.io.read_triangle_mesh(
-        "data/ycb/strawberry/012_strawberry/google_512k/textured.obj",
+        "data/ycb/012_strawberry/google_512k/textured.obj",
         enable_post_processing=True
     )
     mesh.compute_vertex_normals()
